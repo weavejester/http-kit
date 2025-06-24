@@ -76,6 +76,31 @@
 
 (declare wrap-ring-websocket)
 
+(def ^:private no-ring-websockets?
+  (when (= (System/getProperty "http-kit.no-ring-protocols") "true")
+    (println "Note: disabled Ring core protocol support for testing.")
+    true))
+
+(defn- ring-streamable-resp [rresp]
+  (utils/compile-if
+    (when-not no-ring-websockets? (require '[ring.core.protocols :as rp]) true)
+    (let [body (:body rresp)]
+      (if (satisfies? rp/StreamableResponseBody body)
+        (assoc rresp :body
+               (reify org.httpkit.server.IStreamableResponseBody
+                 (^void run [_ ^java.io.OutputStream out]
+                   (rp/write-body-to-stream body rresp out))))
+        rresp))
+    rresp))
+
+(defn- wrap-ring-streamable [ring-handler]
+  (fn ring-handler*
+    ([rreq] (ring-streamable-resp (ring-handler rreq)))
+    ([rreq respond raise]
+     (ring-handler rreq
+                   (fn respond* [rresp] (respond (ring-streamable-resp rresp)))
+                   raise))))
+
 (defn run-server
   "Starts a mostly[1] Ring-compatible HttpServer with options:
 
@@ -163,7 +188,7 @@
 
         ^org.httpkit.server.IHandler h
         (RingHandler.
-          (wrap-ring-websocket handler) ring-async? worker-pool
+          (-> handler wrap-ring-streamable wrap-ring-websocket) ring-async? worker-pool
           err-logger evt-logger evt-names server-header)
 
         ^ProxyProtocolOption proxy-enum

@@ -16,4 +16,9 @@ public class RespCallback {
     public void run(ByteBuffer... buffers) {
         server.tryWrite(key, buffers);
     }
+
+    public void run(ByteBuffer[] headers, IStreamableResponseBody body) {
+        server.tryWrite(key, true, headers);
+        body.run(new HttpOutputStream(key, server, true, 4096));
+    }
 }

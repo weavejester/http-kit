@@ -140,6 +140,7 @@ public class Decoder {
         int toRead = Math.min(buffer.remaining(), readRemaining);
         byte[] bytes = new byte[toRead];
         buffer.get(bytes, 0, toRead);
+
         listener.onBodyReceived(bytes, toRead);
         if (nextState != null) {
             readRemaining -= toRead;

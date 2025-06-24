@@ -185,7 +185,13 @@ class HttpHandler implements Runnable {
                     headers.put("Connection", "Close");
                 }
                 final int status = getStatus(resp);
-                cb.run(HttpEncode(status, headers, body, this.serverHeader));
+                if (body instanceof IStreamableResponseBody) {  // Ring protocol
+                    headers.putOrReplace("Transfer-Encoding", "chunked");
+                    cb.run(HttpEncode(status, headers, null, this.serverHeader),
+                           (IStreamableResponseBody)body);
+                } else {
+                    cb.run(HttpEncode(status, headers, body, this.serverHeader));
+                }
                 eventLogger.log(eventNames.serverStatusPrefix + status);
             }
         }

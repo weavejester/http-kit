@@ -158,16 +158,16 @@
 
 (deftest test-http-client
   (doseq [host ["http://127.0.0.1:4347" "http://127.0.0.1:14347"]]
-    (is (= 200 (:status @(hkc/get    (str host "/get")   (fn [resp] (is (= 200 (:status resp))) resp)))))
-    (is (= 200 (:status @(hkc/post   (str host "/post")  (fn [resp] (is (= 200 (:status resp))) resp)))))
-    (is (= 200 (:status @(hkc/patch  (str host "/patch") (fn [resp] (is (= 200 (:status resp))) resp)))))
+    (is (= 200 (:status (doto @(hkc/get    (str host "/get")   (fn [resp] (is (= 200 (:status resp))) resp)) prn))))
+    (is (= 200 (:status (doto @(hkc/post   (str host "/post")  (fn [resp] (is (= 200 (:status resp))) resp)) prn))))
+    (is (= 200 (:status (doto @(hkc/patch  (str host "/patch") (fn [resp] (is (= 200 (:status resp))) resp)) prn))))
     (is (= 200 (:status @(hkc/delete (str host "/delete")))))
-    (is (= 200 (:status @(hkc/head   (str host "/get")))))
-    (is (= 200 (:status @(hkc/post   (str host "/post")))))
-    (is (= 404 (:status @(hkc/get    (str host "/404")))))
-    (is (= 200 (:status @(hkc/get    (str host "/get") callback-multi))))
-    (is (= 404 (:status @(hkc/get    (str host "/404") callback-multi))))
-    (is (= 204 (:status @(hkc/get    (str host "/204") callback-multi))))
+    (is (= 200 (:status (doto @(hkc/head   (str host "/get")) prn))))
+    (is (= 200 (:status (doto @(hkc/post   (str host "/post")) prn))))
+    (is (= 404 (:status (doto @(hkc/get    (str host "/404")) prn))))
+    (is (= 200 (:status (doto @(hkc/get    (str host "/get") callback-multi) prn))))
+    (is (= 404 (:status (doto @(hkc/get    (str host "/404") callback-multi) prn))))
+    (is (= 204 (:status (doto @(hkc/get    (str host "/204") callback-multi) prn))))
 
     (let [url (str host "/get")]
       (doseq [_ (range 0 10)]

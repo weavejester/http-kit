@@ -31,6 +31,9 @@
    :no-ring-websockets
    {:jvm-opts ["-Dhttp-kit.no-ring-websockets=true"]}
 
+   :no-ring-protocols
+   {:jvm-opts ["-Dhttp-kit.no-ring-protocols=true"]}
+
    :dev
    {:jvm-opts ["-server" "-Xms1024m" "-Xmx2048m"]
     :java-source-paths ["test/java" "src/java"]
@@ -64,6 +67,6 @@
      [mx.cider/enrich-classpath "1.19.3"]]}}
 
   :aliases
-  {"start-dev"       ["with-profile" "+dev,+nrepl" "repl" ":headless"]
-   "test-no-ring-ws" ["with-profile" "+no-ring-websockets" "test" ":ci"]
-   "test-ci"         ["do" ["test" ":ci"] ["test-no-ring-ws"]]})
+  {"start-dev"    ["with-profile" "+dev,+nrepl" "repl" ":headless"]
+   "test-no-ring" ["with-profile" "+no-ring-websockets,+no-ring-protocols" "test" ":ci"]
+   "test-ci"      ["do" ["test" ":ci"] ["test-no-ring"]]})
