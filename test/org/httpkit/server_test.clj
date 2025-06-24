@@ -345,8 +345,8 @@
 (deftest test-decoding-100cpu           ; regression
   ;; request + request sent to server, wait for 2 server responses
   (let [resp (SpecialHttpClient/get2 "http://localhost:4347/")]
-    (= 2 (count (re-seq #"hello world" resp)))
-    (= 2 (count (re-seq #"200" resp)))))
+    (is (= 2 (count (re-seq #"hello world" resp))))
+    (is (= 2 (count (re-seq #"200" resp))))))
 
 (deftest test-http10-keepalive
   ;; request + request sent to server, wait for 2 server responses
