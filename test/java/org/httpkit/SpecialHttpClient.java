@@ -26,18 +26,20 @@ public class SpecialHttpClient {
         s.connect(addr);
         OutputStream os = s.getOutputStream();
 
-        String request = "GET " + HttpUtils.getPath(uri)
-                + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        String requests =
+            "GET " + HttpUtils.getPath(uri) + " HTTP/1.1\r\n"
+            + "Host: localhost\r\n\r\n"
+            + "GET " + HttpUtils.getPath(uri) + " HTTP/1.1\r\n"
+            + "Host: localhost\r\n"
+            + "Connection: close\r\n\r\n";
 
-        os.write((request + request).getBytes());
+        os.write(requests.getBytes());
         os.flush();
 
         InputStream is = s.getInputStream();
-
-        byte[] buffer = new byte[8096];
-        int read = is.read(buffer);
+        String resp = readAll(is);
         s.close();
-        return new String(buffer, 0, read);
+        return resp;
     }
 
     public static String http10(String url) throws Exception {
@@ -48,17 +50,20 @@ public class SpecialHttpClient {
         s.connect(addr);
         OutputStream os = s.getOutputStream();
 
-        String request = "GET " + HttpUtils.getPath(uri)
-                + " HTTP/1.0\r\nHost: localhost\r\nConnection: keep-alive\r\n\r\n";
-        os.write((request + request).getBytes());
+        String requests =
+            "GET " + HttpUtils.getPath(uri) + " HTTP/1.0\r\n"
+            + "Host: localhost\r\n"
+            + "Connection: keep-alive\r\n\r\n"
+            + "GET " + HttpUtils.getPath(uri) + " HTTP/1.0\r\n"
+            + "Host: localhost\r\n\r\n";
+
+        os.write(requests.getBytes());
         os.flush();
 
         InputStream is = s.getInputStream();
-
-        byte[] buffer = new byte[8096];
-        int read = is.read(buffer);
+        String resp = readAll(is);
         s.close();
-        return new String(buffer, 0, read);
+        return resp;
     }
 
     // sent request one byte at a time
@@ -74,7 +79,7 @@ public class SpecialHttpClient {
         String request = "GET " + HttpUtils.getPath(uri) + " HTTP/1.1\r\n";
         request += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
         request += "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.52 Safari/537.17\r\n";
-        request += "Connection: close\n";
+        request += "Connection: close\r\n";
         request += "\r\n";
 
         byte[] bytes = request.getBytes();
@@ -89,10 +94,9 @@ public class SpecialHttpClient {
             os.flush();
         }
 
-        byte[] buffer = new byte[8096];
-        int read = is.read(buffer);
+        String resp = readAll(is);
         s.close();
-        return new String(buffer, 0, read);
+        return resp;
     }
 
     public static byte[] encodeWsRequest(String mesg) {
@@ -219,12 +223,22 @@ public class SpecialHttpClient {
 
             InputStream is = s.getInputStream();
 
-            byte[] buffer = new byte[8096];
-            int read = is.read(buffer);
+            String resp = readAll(is);
             s.close();
-            return new String(buffer, 0, read);
+            return resp;
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static String readAll(InputStream is) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        byte[] buffer = new byte[8096];
+        int read;
+
+        while ((read = is.read(buffer)) != -1) {
+            sb.append(new String(buffer, 0, read));
+        }
+        return sb.toString();
     }
 }
