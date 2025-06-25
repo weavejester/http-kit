@@ -16,7 +16,8 @@
   :test-paths ["test"]
   :test-selectors
   {:all (constantly true)
-   :ci  (complement :skip-ci)}
+   :ci  (complement :skip-ci)
+   :xxxx :xxxx}
 
   :dependencies []
 

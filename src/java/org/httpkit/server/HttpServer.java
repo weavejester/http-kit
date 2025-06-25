@@ -181,7 +181,7 @@ public class HttpServer implements Runnable {
         }
     }
 
-    private void closeKey(final SelectionKey key, int status) {
+    public void closeKey(final SelectionKey key, int status) {
 
         keptAlive.remove(key);
 

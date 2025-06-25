@@ -19,6 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.httpkit.HttpStatus;
 import org.httpkit.HeaderMap;
 import org.httpkit.PrefixThreadFactory;
 import org.httpkit.logger.ContextLogger;
@@ -180,14 +181,17 @@ class HttpHandler implements Runnable {
             if (!(body instanceof AsyncChannel)) { // hijacked
                 HeaderMap headers = HeaderMap.camelCase((Map) resp.get(HEADERS));
                 if (req.version == HTTP_1_0 && req.isKeepAlive) {
-                    headers.put("Connection", "Keep-Alive");
+                    headers.put("Connection", "keep-alive");
                 } else if (req.version == HTTP_1_1 && !req.isKeepAlive) {
-                    headers.put("Connection", "Close");
+                    headers.put("Connection", "close");
                 }
                 final int status = getStatus(resp);
                 if (body instanceof IStreamableResponseBody) {  // Ring protocol
-                    headers.putOrReplace("Transfer-Encoding", "chunked");
-                    cb.run(HttpEncode(status, headers, null, this.serverHeader),
+                    if (serverHeader != null && !headers.containsKey("Server")) {
+                        headers.put("Server", serverHeader);
+                    }
+                    cb.run(HttpStatus.valueOf(status),
+                           headers,
                            (IStreamableResponseBody)body);
                 } else {
                     cb.run(HttpEncode(status, headers, body, this.serverHeader));

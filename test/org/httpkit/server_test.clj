@@ -216,11 +216,13 @@
     (is (= (get-in resp [:headers "content-type"]) "text/plain"))
     (is (:body resp))))
 
-(deftest test-body-inputstream
+(deftest ^:xxxx test-body-inputstream
   (doseq [length (range 1 (* 1024 1024 5) 1439987)] ; max 5m, many files
     (let [uri (str "http://localhost:4347/inputstream?l=" length)
           resp (http/get uri)]
       (is (= (:status resp) 200))
+      (when (not= length (count (:body resp)))
+        (prn resp))
       (is (= length (count (:body resp)))))))
 
 (deftest test-body-bytearray
@@ -352,7 +354,7 @@
   ;; request + request sent to server, wait for 2 server responses
   (let [resp (SpecialHttpClient/http10 "http://localhost:4347/")]
     (is (re-find #"200" resp))
-    (is (re-find #"Keep-Alive" resp))))
+    (is (re-find #"keep-alive" resp))))
 
 (deftest ^:skip-ci test-ipv6
   ;; GitHub Actions has difficulties with [::1] IPv6 on AWS CIs,

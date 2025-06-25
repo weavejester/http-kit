@@ -2,6 +2,8 @@ package org.httpkit.server;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import org.httpkit.HeaderMap;
+import org.httpkit.HttpStatus;
 
 public class RespCallback {
     private final SelectionKey key;
@@ -17,8 +19,7 @@ public class RespCallback {
         server.tryWrite(key, buffers);
     }
 
-    public void run(ByteBuffer[] headers, IStreamableResponseBody body) {
-        server.tryWrite(key, true, headers);
-        body.run(new HttpOutputStream(key, server, true, 4096));
+    public void run(HttpStatus status, HeaderMap headers, IStreamableResponseBody body) {
+        body.run(new HttpOutputStream(key, server, status, headers, 4096));
     }
 }
