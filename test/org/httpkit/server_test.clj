@@ -653,3 +653,7 @@
 
     (.await after-latch)
     (is (= @state_ :after-join))))
+
+(deftest ^:xxxx test-conflicting-async-channels
+  (let [resp (SpecialHttpClient/get2 "http://localhost:4347/slow")]
+    (is (= 2 (count (re-seq #"(?s)200.*hello world" resp))))))

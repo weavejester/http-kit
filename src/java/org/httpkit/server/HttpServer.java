@@ -357,13 +357,8 @@ public class HttpServer implements Runnable {
     }
 
     public void tryWrite(final SelectionKey key, ByteBuffer... buffers) {
-        tryWrite(key, false, buffers);
-    }
-
-    public void tryWrite(final SelectionKey key, boolean chunkInprogress, ByteBuffer... buffers) {
         ServerAtta atta = (ServerAtta) key.attachment();
         synchronized (atta) {
-            atta.chunkedResponseInprogress(chunkInprogress);
             if (atta.toWrites.isEmpty()) {
                 SocketChannel ch = (SocketChannel) key.channel();
                 try {
